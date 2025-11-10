@@ -45,20 +45,9 @@ async def show_commands(interaction: discord.Interaction):
             color=discord.Color.green()
             )
 
-    slash_commands = []
-    for cmd in bot.tree.get_commands():
-        slash_commands.append(f"/{cmd.name} - {cmd.description}")
-    
-    if slash_commands:
-
-        embed.add_field(
-            name="Slash Commands",
-            value="\n".join(slash_commands),
-            inline=False
-        )
-
     for cog_name, cog in bot.cogs.items():
         commands_list = cog.get_commands()
+        app_command_list = cog.get_app_commands()
 
         if commands_list:
 
@@ -68,7 +57,15 @@ async def show_commands(interaction: discord.Interaction):
                 value=commands_info,
                 inline=False
             ) 
+        
+        if app_command_list:
 
+            app_command_info = "\n".join([f"/{cmd.name} - {cmd.description}" for cmd in app_command_list])
+            embed.add_field(
+                    name=f"{cog_name} Commands",
+                    value=app_command_info,
+                    inline=False
+                    )
 
     await interaction.response.send_message(embed=embed)  
 
@@ -82,7 +79,7 @@ async def on_message_sent(message):
 
 async def main():
     await bot.add_cog(Greeting(bot))
-    extensions = ["cogs.fun", "cogs.admin", "cogs.ac"]
+    extensions = ["cogs.fun", "cogs.actions", "cogs.admin"]
 
     for ex in extensions:
         try:
