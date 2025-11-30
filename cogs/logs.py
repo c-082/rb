@@ -10,34 +10,34 @@ class ModLog(commands.Cog):
         self.bot = bot
 
     def get_log_channel_id(self, guild_id: int):
-        conn = get_database()
-        cursor = conn.cursor()
+        conn = await get_database()
+        cursor = await conn.cursor()
 
-        cursor.execute("""
+        await cursor.execute("""
             SELECT log_channel_id FROM server
             WHERE guild_id = ?
         """, (guild_id,))
 
-        result = cursor.fetchone()
+        result = await cursor.fetchone()
 
-        cursor.close()
-        conn.close()
+        await cursor.close()
+        await conn.close()
 
         return result[0] if result else None
 
     def set_log_channel_id(self, guild_id: int, channel_id: int):
-        conn = get_database()
-        cursor = conn.cursor()
+        conn = await get_database()
+        cursor = await conn.cursor()
 
-        cursor.execute("""
+        await cursor.execute("""
             INSERT INTO server (guild_id, log_channel_id)
             VALUES (?, ?)
             ON CONFLICT(guild_id) DO UPDATE SET log_channel_id = excluded.log_channel_id
         """, (guild_id, channel_id))
 
-        conn.commit()
-        cursor.close()
-        conn.close()
+        await conn.commit()
+        await cursor.close()
+        await conn.close()
 
     def get_log_channel(self, guild: discord.Guild):
         channel_id = self.get_log_channel_id(guild.id)
