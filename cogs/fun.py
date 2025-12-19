@@ -54,7 +54,9 @@ class TODView(discord.ui.View):
         await interaction.response.send_message(embed=embed, view=self)
 
 
-class Fun(commands.GroupCog, name="fun"):
+class Fun(commands.Cog):
+    fun_group = app_commands.Group(name="Fun", description="Have fun with these")
+
     def __init__(self, bot):
         self.bot = bot
 
@@ -88,7 +90,7 @@ class Fun(commands.GroupCog, name="fun"):
 
         await ctx.send(embed=embed)
 
-    @app_commands.command(
+    @fun_group.command(
         name="8ball", description="Talk with Ralsei of True Wisdom and Knowledge"
     )
     async def ball(self, interaction: discord.Interaction, message: str):
@@ -121,9 +123,7 @@ class Fun(commands.GroupCog, name="fun"):
 
         await interaction.response.send_message(embed=embed)
 
-    @app_commands.command(
-        name="truth_or_dare", description="Play some TOD with Ralsei!"
-    )
+    @fun_group.command(name="truth_or_dare", description="Play some TOD with Ralsei!")
     async def tod(self, interaction: discord.Interaction):
         view = TODView()
         embed = discord.Embed(
