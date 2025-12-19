@@ -1,26 +1,11 @@
 import discord
 from discord.ext import commands
+from discord import app_commands
 
 
-class Admin(commands.Cog):
+class Admin(commands.GroupCog, name="admin"):
     def __init__(self, bot):
         self.bot = bot
-
-    @commands.group(name="admin", invoke_without_command=True)
-    async def admin(self, ctx):
-        if ctx.invoke_subcommand is None:
-            embed = discord.Embed(
-                title="Admin commands", description="", color=discord.Color.green()
-            )
-
-            for command in self.admin.commands:
-                embed.add_field(
-                    name="",
-                    value=f"{command.name} - {command.help or 'No description provided'}",
-                    inline=True,
-                )
-
-            await ctx.send(embed=embed)
 
     @commands.command(name="show_members")
     @commands.has_any_role(
@@ -35,8 +20,8 @@ class Admin(commands.Cog):
         members_list = [f"{member.mention} - {member.name}" for member in members]
         members_text = "\n".join(members_list)
 
-        if len(members) <= 1:
-            await ctx.send("No members in sight")
+        if not members:
+            await ctx.send(f"No members in sight")
             return
 
         if len(members_text) > 1024:
@@ -65,7 +50,7 @@ class Admin(commands.Cog):
 
         await ctx.send(embed=embed)
 
-    @admin.command(name="kick")
+    @commands.command(name="kick")
     @commands.has_permissions(kick_members=True)
     async def kick_member(self, ctx, member: discord.Member, reason=None):
         embed = discord.Embed(
@@ -88,7 +73,7 @@ class Admin(commands.Cog):
         except Exception as e:
             await ctx.send(f"Error: {e} -_-")
 
-    @admin.command(name="ban")
+    @commands.command(name="ban")
     @commands.has_permissions(ban_members=True)
     async def ban_member(self, ctx, member: discord.Member, reason=None):
         embed = discord.Embed(
