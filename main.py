@@ -6,33 +6,42 @@ import os
 from dotenv import load_dotenv
 from db.connection import get_database
 import time
+import aiosqlite
 
 load_dotenv()
 TOKEN = os.getenv("TOKEN")
 intents = discord.Intents.all()
 bot = commands.Bot(command_prefix="r:", intents=intents)
+starter_time = time.perf_counter()
 
+async def setup_database():
+    async with aiosqlite.connect("database.db") as db:
+        await db.executescript("""
+        CREATE TABLE IF NOT EXISTS server (
+            guild_id INTEGER PRIMARY KEY, 
+            welcome_channel INTEGER,
+            counting_channel INTEGER,
+            log_channel INTEGER
+        );
 
-@bot.event
-async def on_ready():
-    try:
-        sync = await bot.tree.sync()
-        print(f"Synced {len(sync)} app commands!")
-        print(f"Logged in as {bot.user}!")
-    except Exception as e:
-        print(f"Failed to load commands: {e}")
+        CREATE TABLE IF NOT EXISTS count_state ( 
+            guild_id INTEGER PRIMARY KEY, 
+            current_count INTEGER NOT NULL DEFAULT 0,
+            last_user_id INTEGER,
+            best_count INTEGER NOT NULL DEFAULT 0
+        );
+        """)
+        await db.commit()
 
 
 class Utility(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-        self.starter_time = time.perf_counter()
 
     @commands.command(name="ping")
     async def ping(self, ctx):
-        self.end_time = time.perf_counter()
-        self.duration = self.end_time - self.starter_time
-        await ctx.send((f"Aaaand pong! in {int(self.duration)}MS"))
+        latency = round(self.bot.latency * 1000)
+        await ctx.send((f"Aaaand pong! in {latency}ms"))
 
     @app_commands.command(name="welcome", description="Setup your Welcome channel")
     @app_commands.default_permissions(administrator=True)
@@ -47,12 +56,10 @@ class Utility(commands.Cog):
             """
                 INSERT INTO server (guild_id, welcome_channel)
                 VALUES (?, ?)
-                ON CONFLICT(guild_id) DO UPDATE SET welcome_channel = excluded.welcome_channel 
+                ON CONFLICT(guild_id) 
+                DO UPDATE SET welcome_channel = excluded.welcome_channel 
             """,
-            (
-                interaction.guild.id,
-                channel.id,
-            ),
+            (interaction.guild.id, channel.id),
         )
 
         await db.commit()
@@ -73,11 +80,8 @@ class Utility(commands.Cog):
                 INSERT INTO server (guild_id, counting_channel)
                 VALUES (?, ?)
                 ON CONFLICT(guild_id) DO UPDATE SET counting_channel = excluded.counting_channel 
-        """,
-            (
-                interaction.guild.id,
-                channel.id,
-            ),
+             """,
+            (interaction.guild.id, channel.id),
         )
 
         await db.commit()
@@ -97,12 +101,10 @@ class Utility(commands.Cog):
             """
                 INSERT INTO server (guild_id, log_channel)
                 VALUES (?, ?)
-                ON CONFLICT(guild_id) DO UPDATE SET log_channel = excluded.log_channel 
-        """,
-            (
-                interaction.guild.id,
-                channel.id,
-            ),
+                ON CONFLICT(guild_id) 
+                DO UPDATE SET log_channel = excluded.log_channel 
+            """,
+            (interaction.guild.id, channel.id),
         )
 
         await db.commit()
@@ -113,22 +115,20 @@ class Utility(commands.Cog):
     async def on_member_join(self, member):
         db = await get_database()
 
-        cursor = await db.execute(
-            "SELECT welcome_channel FROM server WHERE guild_id = ? ", (member.guild.id,)
-        )
+        async with db.execute(
+            "SELECT welcome_channel FROM server WHERE guild_id = ?", (member.guild.id,)
+        ) as cursor:
+            row = await cursor.fetchone()
 
-        result = await cursor.fetchone()
-
-        if result and result[0]:
-            channel_id = int(result[0])
-            channel = member.guild.get_channel(channel_id)
-            try:
-                if channel:
+        if row and row[0]:
+            channel = member.guild.get_channel(int(row[0]))
+            if channel:
+                try:
                     await channel.send(
                         f"Welcome {member.mention} to {member.guild.name}!"
                     )
-            except discord.Forbidden:
-                print(f"Missing permissions to welcome message in {channel}")
+                except discord.Forbidden:
+                    print(f"Missing permissions to welcome message in {channel}")
 
     @app_commands.command(name="commands", description="Shows all available commands")
     async def show_commands(self, interaction: discord.Interaction):
@@ -150,9 +150,21 @@ class Utility(commands.Cog):
 
         await interaction.response.send_message(embed=embed)
 
+@bot.event
+async def on_ready():
+    sync = await bot.tree.sync()
+    print(f"Synced {len(sync)} app commands!")
+    print(f"Logged in as {bot.user}!")
 
 async def main():
-    extensions = ["cogs.fun", "cogs.actions", "cogs.count", "cogs.ai", "cogs.admin"]
+    await setup_database()
+    extensions = [
+        "cogs.fun",
+        "cogs.actions",
+        "cogs.count",
+        "cogs.logs",
+        "cogs.tod",
+        "cogs.admin"] 
 
     for ex in extensions:
         try:
