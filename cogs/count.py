@@ -1,4 +1,3 @@
-import re
 import discord
 from discord.ext import commands
 from db.connection import get_database
@@ -7,34 +6,40 @@ class Count(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
+    async def ensure_guild_entry(self, guild_id: int):
+        db = await get_database() 
+        await db.execute(
+            """
+            INSERT OR IGNORE INTO count_state 
+            (guild_id,current_count, best_count, last_user_id)
+            VALUES (?, 0, 0, NULL)
+            """,
+            (guild_id,),
+        )
+
+        await db.commit()
+
     async def get_count_channel(self, guild_id: int):
         db = await get_database()
         async with db.execute(
-            "SELECT counting_channel FROM count_state WHERE guild_id = ?", (guild_id,)
+            "SELECT counting_channel FROM server WHERE guild_id = ?", (guild_id,)
         ) as cursor:
             row = await cursor.fetchone()
             
         return row[0] if row and row[0] else None
 
     async def get_current_count(self, guild_id: int):
+        await self.ensure_guild_entry(guild_id)
+        
         db = await get_database()
         async with db.execute(
-            "SELECT current_count FROM count_state WHERE guild_id = ?", (guild_id,)
+            "SELECT current_count, last_user_id, best_count FROM count_state WHERE guild_id = ?", (guild_id,)
         ) as cursor:
             row = await cursor.fetchone()
-        
-        if row:
-            return row
 
-        await db.execute(
-            "SELECT counting_channel FROM server WHERE guild_id = ?", 
-            (guild_id,)
-        )
-        await db.commit()
+        return row if row else (0, None, 0)
 
-        return (0, None, 0)
-
-    async def update_count(self, guild_id: int, current: int, last_user: int, best: int):
+    async def update_count(self, guild_id: int, current: int, last_user: int | None, best: int):
         db = await get_database()
         await db.execute(
             """
@@ -44,12 +49,14 @@ class Count(commands.Cog):
             """,
             (current, last_user, best, guild_id),
             )
-
+        await db.commit()
 
     @commands.Cog.listener()
     async def on_message(self, message: discord.Message):
         if message.author.bot or not message.guild:
             return
+
+        await self.bot.process_commands(message)
 
         counting_channel = await self.get_count_channel(message.guild.id)
         if not counting_channel or message.channel.id != counting_channel:
@@ -73,17 +80,15 @@ class Count(commands.Cog):
         if number == current + 1: 
             new_best = max(best, number)
             await self.update_count(message.guild.id, number, message.author.id, new_best)
-            await message.react("✅")
+            await message.add_reaction("✅")
         else:
-
             await message.add_reaction("❌")
             await message.channel.send(
-                    f"{message.author.mention} broke the count at **{current}**. Reset to 0."
+                    f"{message.author.mention} broke the count at **{current + 1}**. Reset to 1."
             )
 
             await self.update_count(message.guild.id, 0, None, best)
 
-        await self.bot.process_commands(message)
 
 
 async def setup(bot):
