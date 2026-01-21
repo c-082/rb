@@ -14,23 +14,17 @@ intents = discord.Intents.all()
 bot = commands.Bot(command_prefix="r:", intents=intents)
 starter_time = time.perf_counter()
 
+
+@bot.event
+async def on_ready():
+    sync = await bot.tree.sync()
+    print(f"Synced {len(sync)} app commands!")
+    print(f"Logged in as {bot.user}!")
+
 async def setup_database():
     async with aiosqlite.connect("database.db") as db:
-        await db.executescript("""
-        CREATE TABLE IF NOT EXISTS server (
-            guild_id INTEGER PRIMARY KEY, 
-            welcome_channel INTEGER,
-            counting_channel INTEGER,
-            log_channel INTEGER
-        );
-
-        CREATE TABLE IF NOT EXISTS count_state ( 
-            guild_id INTEGER PRIMARY KEY, 
-            current_count INTEGER NOT NULL DEFAULT 0,
-            last_user_id INTEGER,
-            best_count INTEGER NOT NULL DEFAULT 0
-        );
-        """)
+        with open("db/setup.sql", "r") as f:
+            await db.executescript(f.read())
         await db.commit()
 
 
@@ -63,8 +57,10 @@ class Utility(commands.Cog):
         )
 
         await db.commit()
-
-        await interaction.followup.send(f"Welcome channel set to {channel.mention}")
+        try:
+            await interaction.followup.send(f"Welcome channel set to {channel.mention}")
+        except Exception as e:
+            await interaction.followup.send(f"Error: {e}", ephemeral=True)
 
     @app_commands.command(name="counting", description="Set up your counting channel")
     @app_commands.default_permissions(administrator=True)
@@ -85,8 +81,10 @@ class Utility(commands.Cog):
         )
 
         await db.commit()
-
-        await interaction.followup.send(f"Counting channel set to {channel.mention}")
+        try:
+            await interaction.followup.send(f"Counting channel set to {channel.mention}")
+        except Exception as e:
+            await interaction.followup.send(f"Error: {e}", ephemeral=True)
 
     @app_commands.command(name="modlog", description="Set up your modlog channel")
     @app_commands.default_permissions(administrator=True)
@@ -109,7 +107,10 @@ class Utility(commands.Cog):
 
         await db.commit()
 
-        await interaction.followup.send(f"Log channel set to {channel.mention}")
+        try: 
+            await interaction.followup.send(f"Log channel set to {channel.mention}")
+        except Exception as e:
+            await interaction.followup.send(f"Error: {e}", ephemeral=True)
 
     @commands.Cog.listener()
     async def on_member_join(self, member):
@@ -150,11 +151,6 @@ class Utility(commands.Cog):
 
         await interaction.response.send_message(embed=embed)
 
-@bot.event
-async def on_ready():
-    sync = await bot.tree.sync()
-    print(f"Synced {len(sync)} app commands!")
-    print(f"Logged in as {bot.user}!")
 
 async def main():
     await setup_database()
@@ -164,6 +160,7 @@ async def main():
         "cogs.count",
         "cogs.logs",
         "cogs.tod",
+        "cogs.exp",
         "cogs.admin"] 
 
     for ex in extensions:
