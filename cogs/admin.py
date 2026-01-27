@@ -3,7 +3,7 @@ from discord.ext import commands
 from discord import app_commands
 
 
-class Admin(commands.GroupCog, name="admin"):
+class Admin(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
@@ -21,7 +21,7 @@ class Admin(commands.GroupCog, name="admin"):
         members_text = "\n".join(members_list)
 
         if not members:
-            await ctx.send(f"No members in sight")
+            await ctx.send("No members in sight")
             return
 
         if len(members_text) > 1024:
