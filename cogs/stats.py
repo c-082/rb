@@ -7,18 +7,18 @@ class Stats(commands.Cog):
     def __init__(self, bot) -> None:
         self.bot = bot
 
-    async def get_user_exp_stats(self, user_id: int):
+    async def get_user_exp_stats(self, user_id: int, guild_id: int):
         db = await get_database()
 
-        async with db.execute("SELECT exp FROM user WHERE user_id = ?", (user_id,)) as cursor:
+        async with db.execute("SELECT exp FROM user WHERE user_id = ? AND guild_id = ?", (user_id,guild_id,)) as cursor:
             row = await cursor.fetchone()
 
         return row if row else 0
 
-    async def get_user_cur_stats(self, user_id: int):
+    async def get_user_cur_stats(self, user_id: int, guild_id: int):
         db = await get_database()
 
-        async with db.execute("SELECT currency FROM user WHERE user_id = ?", (user_id)) as cursor:
+        async with db.execute("SELECT currency FROM user WHERE user_id = ? AND guild_id = ?", (user_id,guild_id,)) as cursor:
             row = await cursor.fetchone()
 
         return row if row else 0
