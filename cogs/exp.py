@@ -13,15 +13,15 @@ class UserEXP(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.buffer: dict[tuple[int, int], int] = {}
-        self.last_message_time: dict[int, float] = {}
-        self.level_cache: dict[int, int] = {}
+        self.last_message_time: dict[tuple[int, int], float] = {}
+        self.level_cache: dict[tuple[int, int], int] = {}
 
         self.flush_exp.start()
 
     async def get_user_exp(self, user_id: int, guild_id: int) -> int:
         db = await get_database()
 
-        async with db.execute("SELECT exp FROM user WHERE user_id = ? AND guild_id = ?", (user_id,, guild_id)) as cursor:
+        async with db.execute("SELECT exp FROM user WHERE user_id = ? AND guild_id = ?", (user_id, guild_id,)) as cursor:
             row = await cursor.fetchone()
         
 
