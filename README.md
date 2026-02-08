@@ -9,7 +9,7 @@ if you wanna use Ralsei bot as a sort of template, you need the following:
 Make sure the your bot has permission to read messages, send, and manage interactions in the guild.
 
 # Installation
-To install Ralsei bot, you must clome the repo and install it's dependencies 
+To install Ralsei bot, you must clone the repo and install it's dependencies 
 ```
 git clone https://github.com/theoriginalralsei/ralsei-bot.git
 cd ralsei-bot
