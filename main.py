@@ -158,9 +158,11 @@ async def main():
         "cogs.fun",
         "cogs.actions",
         "cogs.count",
+        "cogs.ai",
         "cogs.logs",
         "cogs.tod",
         "cogs.exp",
+        "cogs.stats",
         "cogs.admin"] 
 
     for ex in extensions:
