@@ -7,11 +7,11 @@ class Currency(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    async def get_user_cur(self, user_id: int):
+    async def get_user_cur(self, user_id: int, guild_id: int) -> int:
         try:
             db = await get_database()
 
-            async with db.execute("SELECT currency FROM user WHERE user_id = ?", (user_id,)) as cursor:
+            async with db.execute("SELECT currency FROM user WHERE user_id = ? AND guild_id = ?", (user_id, guild_id,)) as cursor:
                 row = await cursor.fetchone()
 
             return row[0] if row and row[0] else 0
@@ -19,9 +19,9 @@ class Currency(commands.Cog):
             print(f"Error getting user currency: {e}")
             return 0
 
-    async def update_user_cur(self, user_id: int, amount: int):
+    async def update_user_cur(self, user_id: int, amount: int, guild_id: int):
         if amount < 0:
-            current_balance = await self.get_user_cur(user_id)
+            current_balance = await self.get_user_cur(user_id, guild_id)
             if current_balance + amount < 0:
                 return False
         
@@ -31,8 +31,8 @@ class Currency(commands.Cog):
             await db.execute("""
             UPDATE user
             SET currency = currency + ?
-            WHERE user_id = ?
-            """, (amount, user_id,))
+            WHERE user_id = ? AND guild_id = ?
+            """, (amount, user_id, guild_id,))
 
             await db.commit()
             return True
@@ -49,7 +49,7 @@ class Currency(commands.Cog):
             await ctx.channel.send("Error: Bet amount must be positive")
             return
         
-        current_balance = await self.get_user_cur(ctx.author.id)
+        current_balance = await self.get_user_cur(ctx.author.id, ctx.guild.id)
         if current_balance < bet_amount:
             await ctx.channel.send("You don't have enough.")
             return
@@ -59,12 +59,12 @@ class Currency(commands.Cog):
         if result == 1:
             await ctx.channel.send("Heads. You win")
             winnings = random.randint(bet_amount, bet_amount * 2)
-            success = await self.update_user_cur(ctx.author.id, winnings)
+            success = await self.update_user_cur(ctx.author.id, winnings, ctx.guild.id)
             if success:
                 await ctx.channel.send(f"You won {winnings} currency")
         else:
             await ctx.channel.send("Tails. You lose!")
-            success = await self.update_user_cur(ctx.author.id, -bet_amount)
+            success = await self.update_user_cur(ctx.author.id, -bet_amount, ctx.guild.id)
             if success:
                 await ctx.channel.send(f"You lost {bet_amount} currency")
 
