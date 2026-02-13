@@ -38,8 +38,8 @@ class app_commands(commands.Cog):
         latency = round(self.bot.latency * 1000)
         await ctx.send((f"Aaaand pong! in {latency}ms"))
 
-    @commands.command(name="welcome", description="Setup your Welcome channel")
-    @commands.default_permissions(administrator=True)
+    @app_commands.command(name="welcome", description="Setup your Welcome channel")
+    @app_commands.default_permissions(administrator=True)
     async def set_welcome(self, interaction: discord.Interaction, channel: discord.TextChannel):
         await interaction.response.defer()
 
@@ -156,7 +156,6 @@ async def main():
         "cogs.actions",
         "cogs.count",
         # NOTE: cogs.ai is VERY slow if you don't have a CUDA GPU ( and could slow down your CPU ). If you want, remove the next line
-        "cogs.ai"
         "cogs.logs",
         "cogs.tod",
         "cogs.exp",
