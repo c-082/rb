@@ -26,6 +26,15 @@ class UserEXP(commands.Cog):
         
 
         return row[0] if row else 0
+
+    async def get_guild_leaderboard(self, guild_id: int):
+        db = await get_database()
+
+        async with db.execute("SELECT user_id, exp FROM user WHERE guild_id = ? ODER BY exp", (guild_id,)) as cursor:
+            rows = await cursor.fetchall()
+
+        return list(rows) if rows else []
+
     def cog_unload(self):
         self.flush_exp.cancel()
 
@@ -81,9 +90,22 @@ class UserEXP(commands.Cog):
             )
             print(f"{message.author} has leveled up {old_level} -> {new_level}")
 
-        await self.bot.process_commands(message)
 
         print(f"{message.author} gained {gained_exp} EXP (Total: {total_exp_after})")
+
+    @commands.command(name="leaderboard")
+    async def leaderboard(self, ctx: commands.Context):
+        rows = await self.get_guild_leaderboard(ctx.guild.id)
+        embed = discord.Embed(title="Leaderboard", color=discord.Color.blue())
+
+        for row in rows[:10]:
+            user = self.bot.get_user(row[0])
+            if user:
+                level = self.get_level(row[1])
+                embed.add_field(name=user.name, value=f"Level: {level} | EXP: {row[1]}", inline=False)
+
+        await ctx.send(embed=embed)
+
 
 
     @tasks.loop(seconds=flush_interval)

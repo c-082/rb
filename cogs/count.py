@@ -93,8 +93,6 @@ class Count(commands.Cog):
         if message.author.bot or not message.guild:
             return
 
-        await self.bot.process_commands(message)
-
         counting_channel = await self.get_count_channel(message.guild.id)
         if not counting_channel or message.channel.id != counting_channel:
             return
@@ -110,7 +108,6 @@ class Count(commands.Cog):
 
             number = int(result)
         except Exception as e:
-            print(f"Error evaluating expression: {e}")
             return
 
         current, last_id, best = await self.get_current_count(message.guild.id)
