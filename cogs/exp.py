@@ -30,7 +30,7 @@ class UserEXP(commands.Cog):
     async def get_guild_leaderboard(self, guild_id: int):
         db = await get_database()
 
-        async with db.execute("SELECT user_id, exp FROM user WHERE guild_id = ? ODER BY exp", (guild_id,)) as cursor:
+        async with db.execute("SELECT user_id, exp FROM user WHERE guild_id = ? ORDER BY exp", (guild_id,)) as cursor:
             rows = await cursor.fetchall()
 
         return list(rows) if rows else []
