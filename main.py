@@ -28,10 +28,9 @@ async def setup_database():
         await db.commit()
 
 
-class app_commands(commands.Cog):
+class Utility(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-
 
     @commands.command(name="ping")
     async def ping(self, ctx):
@@ -128,7 +127,7 @@ class app_commands(commands.Cog):
                 except discord.Forbidden:
                     print(f"Missing permissions to welcome message in {channel}")
 
-    @app_commands.command(name="commands")
+    @commands.command(name="commands")
     async def show_commands(self, ctx: discord.ext.commands.Context):
         embed = discord.Embed(
             title="Commands", description=None, color=discord.Color.green()
@@ -168,7 +167,7 @@ async def main():
             print(f"Loaded {ex}!")
         except Exception as e:
             print(f"Failed to load {ex}, reason {e}")
-    await bot.add_cog(app_commands(bot))
+    await bot.add_cog(Utility(bot))
     await bot.start(TOKEN)
 
 
