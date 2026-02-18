@@ -14,6 +14,7 @@ CREATE TABLE IF NOT EXISTS user(
   user_id INTEGER,
   guild_id INTEGER,
   exp INTEGER DEFAULT 0,
+  last_time_collected INTEGER,
   currency INTEGER DEFAULT 100,
   PRIMARY KEY (user_id, guild_id)
 );
