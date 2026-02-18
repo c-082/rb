@@ -55,18 +55,50 @@ class Currency(commands.Cog):
             return
 
         result = self.coinflip()
+        heads_or_tails = ["heads", "tails"]
         
         if result == 1:
-            await ctx.channel.send("Heads. You win")
             winnings = random.randint(bet_amount, bet_amount * 2)
             success = await self.update_user_cur(ctx.author.id, winnings, ctx.guild.id)
             if success:
-                await ctx.channel.send(f"You won {winnings} currency")
+                message = await ctx.channel.send(f"It landed on {random.choice(heads_or_tails)} and...")
+                await async.sleep(1)
+                await message.edit(content=f"It landed on heads and you won {winnings} currency")
         else:
-            await ctx.channel.send("Tails. You lose!")
+            fail = await self.update_user_cur(ctx.author.id, -bet_amount, ctx.guild.id)
+            if fail:
+                message = await ctx.channel.send(f"It landed on {random.choice(heads_or_tails)} and...")
+                await async.sleep(1)
+                await message.edit(content=f"It landed on {random.choice(heads_or_tails) and you lost {bet_amount} currency")
+
+   @commands.command(name="dice", aliases=["di"])
+    async def dice_command(self, ctx, bet_amount: int = 10, guess: int):
+        if bet_amount <= 0:
+            await ctx.channel.send("Error: Bet amount must be positive")
+            return
+
+        current_balance = await self.get_user_cur(ctx.author.id, ctx.guild.id)
+        if current_balance < bet_amount:
+            await ctx.send("You don't have enough to bet")
+
+        if guess in random.randint(1, 6):
+            winnings = random.randint(bet_amount, bet_amount * 6)
+            success = await self.update_user_cur(ctx.author.id, winnings, ctx.guild.id)
+            if success:
+                message = await ctx.send(f"You guesssed {guess} and...") 
+
+                async.io.sleep(1)
+
+                await message.edit(content=f"You guesssed {guess} and won {winnings} currency")
+        else:
             success = await self.update_user_cur(ctx.author.id, -bet_amount, ctx.guild.id)
             if success:
-                await ctx.channel.send(f"You lost {bet_amount} currency")
+                message = await ctx.send(f"You guesssed {guess} and...") 
+
+                async.io.sleep(1)
+
+                await message.edit(content=f"You guesssed {guess} and lost {bet_amount} currency")
+
 
 async def setup(bot):
     await bot.add_cog(Currency(bot))

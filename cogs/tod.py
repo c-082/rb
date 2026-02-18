@@ -9,6 +9,8 @@ arr_truth = [
     "What's the most Femboy thing you've ever done?",
     "If you had a first date (if so then why are you here-), what was it like?",
     "Weirdest moment?",
+    "How much of a nerd are you on a scale of 1-10?",
+    "Have you ever had a crush on someone here?",
 ]
 
 arr_dare = [
@@ -16,6 +18,7 @@ arr_dare = [
     "Show off your thighs to one person",
     "Show off your thighs to EVERYONE",
     "Share a recent shower thought you had",
+    "Recreate this bot, now."
 ]
 
 
@@ -68,30 +71,6 @@ class TOD(commands.Cog):
             color=discord.Color.blue(),
         )
         await interaction.response.send_message(embed=embed, view=view)
-
-    @app_commands.command(name="truth", description="Ask yourself something")
-    async def truth_func(self, interaction: discord.Interaction):
-        view = TODView.truth_button()
-        embed = discord.Embed(
-            title="Truth Or Dare",
-            description="-# why did i make this",
-            color=discord.Color.blue(),
-        )
-        await interaction.response.send_message(embed=embed, view=view)
-
-    @app_commands.command(
-        name="dare",
-        description="Dare yuorself or smth im so tired why did i wake up at 4am",
-    )
-    async def dare_func(self, interaction: discord.Interaction):
-        view = TODView.dare_button()
-        embed = discord.Embed(
-            title="Truth Or Dare",
-            description="-# why did i make this",
-            color=discord.Color.blue(),
-        )
-        await interaction.response.send_message(embed=embed, view=view)
-
 
 async def setup(bot):
     await bot.add_cog(TOD(bot))
