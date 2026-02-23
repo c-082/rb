@@ -3,8 +3,6 @@ from discord.ext import commands
 import random
 from discord import app_commands
 
-
-
 class Fun(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
@@ -31,11 +29,13 @@ class Fun(commands.Cog):
 
     @app_commands.command(name="8ball", description="Talk with Ralsei of True Wisdom and Knowledge")
     async def ball(self, interaction: discord.Interaction, message: str):
+        user_icon = interaction.user.avatar.url if interaction.user.avatar else None
         embed = discord.Embed(
             title="8ball",
             description=f"Question: {message}",
             color=discord.Color.green(),
         )
+        embed.set_footer(text=f"Asked by {interaction.user}", icon_url=user_icon)
 
         embed.add_field(
             name="\u200b",

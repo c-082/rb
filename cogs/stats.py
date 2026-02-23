@@ -3,7 +3,7 @@ import aiosqlite
 from db.connection import get_database
 from discord.ext import commands
 
-class Stats(commands.Cog):
+class Stats(commands.Cog, name="User Stats"):
     def __init__(self, bot) -> None:
         self.bot = bot
 
@@ -25,10 +25,13 @@ class Stats(commands.Cog):
 
     @commands.command("stats")
     async def get_user_stats(self, ctx):
+        user_icon = ctx.author.avatar.url if ctx.author.avatar else None
         embed = discord.Embed(
             title="Stats",
             color=discord.Color.blue()
         )
+
+        embed.set_footer(text=f"Used by {ctx.author}", icon_url=user_icon)
 
         embed.add_field(name="User", value=f"{ctx.author.name}", inline=False)
         embed.add_field(name="Current EXP", value=f"{await self.get_user_exp_stats(ctx.author.id, ctx.guild.id)}", inline=False)

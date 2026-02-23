@@ -12,6 +12,8 @@ class Action(commands.Cog):
 
     @action.command(name="hug", description="Hugs someone :3")
     async def hug(self, interaction: discord.Interaction, member: discord.Member):
+        user_icon = interaction.user.avatar.url if interaction.user.avatar else None
+
         if member.id == 1434674677682409573:
             messages = [
                 "M...M-me?!",
@@ -37,15 +39,15 @@ class Action(commands.Cog):
             color=discord.Color.green(),
         )
 
+
         embed.set_image(url=chosen_gif)
-        embed.set_footer(
-            text=f"Used by {interaction.user}"
-        )
+        embed.set_footer(text=f"Used by {interaction.user}", icon_url=user_icon)
 
         await interaction.response.send_message(embed=embed)
 
     @action.command(name="kiss", description="Kisses someone :3")
     async def kiss(self, interaction: discord.Interaction, member: discord.Member):
+        user_icon = interaction.user.avatar.url if interaction.user.avatar else None
         if member.id == 1434674677682409573:
             messages = [
                 "M...M-me?!",
@@ -73,13 +75,12 @@ class Action(commands.Cog):
 
         embed.set_image(url=chosen_gif)
 
-        embed.set_footer(
-            text=f"Used by {interaction.user}"
-        )
+        embed.set_footer(text=f"Used by {interaction.user}", icon_url=user_icon)
         await interaction.response.send_message(embed=embed)
 
     @action.command(name="headpat", description="Headpat somone :3")
     async def headpat(self, interaction: discord.Interaction, member: discord.Member):
+        user_icon = interaction.user.avatar.url if interaction.user.avatar else None
         if member.id == 1434674677682409573:
             messages = [
                 "T-too many headpats!!!! >_<",
@@ -112,13 +113,12 @@ class Action(commands.Cog):
 
         embed.set_image(url=chosen_gif)
 
-        embed.set_footer(
-            text=f"Used by {interaction.user}"
-        )
+        embed.set_footer(text=f"Used by {interaction.user}", icon_url=user_icon)
         await interaction.response.send_message(embed=embed)
 
     @action.command(name="slap", description="Slap anyone wwho gets in ya way >:D")
     async def slap(self, interaction: discord.Interaction, member: discord.Member):
+        user_icon = interaction.user.avatar.url if interaction.user.avatar else None
         if member.id == 1434674677682409573:
             messages = ["O-ow! >_<", "That was painful!", "Stop!!!", "Oh yeah- i mean OW!"]
         else:
@@ -135,9 +135,7 @@ class Action(commands.Cog):
             description=chosen_message,
             color=discord.Color.green(),
         )
-        embed.set_footer(
-            text=f"Used by {interaction.user}"
-        )
+        embed.set_footer(text=f"Used by {interaction.user}", icon_url=user_icon)
 
         await interaction.response.send_message(embed=embed)
 
