@@ -3,6 +3,7 @@ import asyncio
 from discord.ext import commands
 from db.connection import get_database
 import random
+import time
 
 class Currency(commands.Cog):
     def __init__(self, bot):
@@ -13,8 +14,8 @@ class Currency(commands.Cog):
             db = await get_database()
 
             async with db.execute("SELECT last_time_collected FROM user WHERE user_id = ? AND guild_id = ?", (user_id, guild_id,)) as cursor:
-                row = cursor.fetchone()
-                return row[0] if row and row[0] else 0
+                row = await cursor.fetchone()
+                return row[0] if row else 0
         except Exception as e:
             print(f"Error getting daily bonus: {e}")
             return 0
@@ -108,6 +109,32 @@ class Currency(commands.Cog):
                 await asyncio.sleep(1)
 
                 await message.edit(content=f"You guesssed {guess} and lost {bet_amount} currency")
+
+    @commands.command(name="daily")
+    async def daily_command(self, ctx):
+        user_id = ctx.author.id
+        guild_id = ctx.guild.id
+        current_time = int(time.time())
+        last_collected = await self.get_daily_bonus(user_id, guild_id)
+        
+        if current_time - last_collected < 86400:
+            await ctx.send("You can only claim daily once per day!")
+            return
+        
+        daily_amount = random.randint(10, 90)
+        success = await self.update_user_cur(user_id, daily_amount, guild_id)
+        
+        if success:
+            db = await get_database()
+            await db.execute("""
+            UPDATE user
+            SET last_time_collected = ?
+            WHERE user_id = ? AND guild_id = ?
+            """, (current_time, user_id, guild_id,))
+            await db.commit()
+            await ctx.send(f"You claimed your daily reward of {daily_amount} currency!")
+        else:
+            await ctx.send("Failed to claim daily reward.")
 
 
 async def setup(bot):
