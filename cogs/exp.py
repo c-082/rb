@@ -9,6 +9,63 @@ import aiosqlite
 save_interval_seconds = 60
 flush_interval = 60
 
+class LeaderboardView(discord.ui.View):
+    def __init__(self, ctx: commands.Context, rows: list, bot, get_level):
+        super().__init__(timeout=60)
+        self.ctx = ctx
+        self.rows = rows
+        self.bot = bot
+        self.get_level = get_level
+        self.per_page = 10
+        self.page = 1
+        self.total_pages = max(1, (len(rows) + self.per_page - 1) // self.per_page)
+        self.update_buttons()
+
+    async def interaction_check(self, interaction: discord.Interaction) -> bool:
+        return interaction.user.id == self.ctx.author.id
+
+    def update_buttons(self):
+        self.children[0].disabled = self.page <= 1
+        self.children[1].disabled = self.page >= self.total_pages
+
+    def get_embed(self):
+        start = (self.page - 1) * self.per_page
+        end = start + self.per_page
+        page_rows = self.rows[start:end]
+
+        embed = discord.Embed(
+            title=f"Leaderboard - Page {self.page}/{self.total_pages}",
+            color=discord.Color.blue()
+        )
+
+        rank = start + 1
+        for row in page_rows:
+            user = self.bot.get_user(row[0])
+            if user:
+                level = self.get_level(row[1])
+                embed.add_field(
+                    name=f"#{rank} {user.name}",
+                    value=f"Level: {level} | EXP: {row[1]}",
+                    inline=False
+                )
+            rank += 1
+
+        return embed
+
+    @discord.ui.button(label="Previous", style=discord.ButtonStyle.secondary)
+    async def previous_button(self, interaction: discord.Interaction, button: discord.ui.Button):
+        if self.page > 1:
+            self.page -= 1
+            self.update_buttons()
+            await interaction.response.edit_message(embed=self.get_embed(), view=self)
+
+    @discord.ui.button(label="Next", style=discord.ButtonStyle.secondary)
+    async def next_button(self, interaction: discord.Interaction, button: discord.ui.Button):
+        if self.page < self.total_pages:
+            self.page += 1
+            self.update_buttons()
+            await interaction.response.edit_message(embed=self.get_embed(), view=self)
+
 class EXP(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
@@ -85,28 +142,13 @@ class EXP(commands.Cog):
         new_level = self.get_level(total_exp_after)
 
         if new_level > old_level:
-            await message.channel.send(f"{message.author.mention} has leveled up! \n"
-                                       f"Level: {old_level} -> {new_level}"
-            )
-            print(f"{message.author} has leveled up {old_level} -> {new_level}")
-
-
-        print(f"{message.author} gained {gained_exp} EXP (Total: {total_exp_after})")
+            await message.channel.send(f"{message.author.mention} has leveled up! {old_level} -> {new_level}")
 
     @commands.command(name="leaderboard")
     async def leaderboard(self, ctx: commands.Context):
         rows = await self.get_guild_leaderboard(ctx.guild.id)
-        embed = discord.Embed(title="Leaderboard", color=discord.Color.blue())
-
-        for row in rows[:10]:
-            user = self.bot.get_user(row[0])
-            if user:
-                level = self.get_level(row[1])
-                embed.add_field(name=user.name, value=f"Level: {level} | EXP: {row[1]} \n ----------------", inline=False)
-
-        await ctx.send(embed=embed)
-
-
+        view = LeaderboardView(ctx, rows, self.bot, self.get_level)
+        await ctx.send(embed=view.get_embed(), view=view)
 
     @tasks.loop(seconds=flush_interval)
     async def flush_exp(self):
@@ -131,6 +173,9 @@ class EXP(commands.Cog):
     @flush_exp.before_loop
     async def before_flush_exp(self):
         await self.bot.wait_until_ready()
+
+
+
 
 async def setup(bot):
     await bot.add_cog(EXP(bot))
