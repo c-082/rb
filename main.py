@@ -14,7 +14,6 @@ intents = discord.Intents.all()
 bot = commands.Bot(command_prefix="r:", intents=intents)
 starter_time = time.perf_counter()
 
-
 @bot.event
 async def on_ready():
     sync = await bot.tree.sync()
@@ -32,10 +31,65 @@ class Utility(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
+    async def get_best_count(self, guild_id):
+        db = await get_database()
+        async with db.excute("SELECT best_count FROM count_state WHERE guild_id = ?", (guild_id,)) as cursor:
+            row = await cursor.fetchone()
+
+        return row[0] if row else None
+
+
+    async def get_current_count(self, guild_id):
+        db = await get_database()
+        async with db.execute("SELECT current_count FROM count_state WHERE guild_id = ?", (guild_id,)) as cursor:
+            row = await cursor.fetchone()
+
+        return row[0] if row else None
+
+
+    async def get_most_user_exp(self, user_id):
+        db = await get_database()
+        async with db.execute("SELECT MAX(exp) FROM user WHERE user_id = ?", (user_id,)) as cursor:
+            row = await cursor.fetchone()
+
+        return row[0] if row else None
+
+    async def get_most_currency(self, user_id):
+        db = await get_database()
+        async with db.execute("SELECT MAX(currency) FROM user WHERE user_id = ?", (user_id,)) as cursor:
+            row = await cursor.fetchone()
+
+        return row[0] if row else None
+
     @commands.command(name="ping")
     async def ping(self, ctx):
         latency = round(self.bot.latency * 1000)
         await ctx.send((f"Aaaand pong! in {latency}ms"))
+
+    @commands.command(name="uptime")
+    async def uptime(self, ctx):
+        current_time = time.perf_counter()
+        uptime_seconds = int(current_time - starter_time)
+        hours, remainder = divmod(uptime_seconds, 3600)
+        minutes, seconds = divmod(remainder, 60)
+        await ctx.send(f"Uptime: {hours}h {minutes}m {seconds}s")
+
+    @commands.command(name="serverinfo")
+    async def server_info(self, ctx):
+        guild = ctx.guild
+        embed = discord.Embed(
+            title=f"{guild.name} Information",
+            color=discord.Color.blue(),
+        )
+        embed.set_thumbnail(url=guild.icon.url if guild.icon else None)
+
+        embed.add_field(name="User with nost exp", value=await self.get_most_user_exp(guild.id), inline=False)
+        embed.add_field(name="User with most currency", value=await self.get_most_currency(guild.id), inline=False)
+        embed.add_field(name="Best count", value=await self.get_best_count(guild.id), inline=False)
+        embed.add_field(name="Current count", value=await self.get_current_count(guild.id), inline=False)
+
+        await ctx.send(embed=embed)
+
 
     @app_commands.command(name="welcome", description="Setup your Welcome channel")
     @app_commands.default_permissions(administrator=True)
@@ -78,7 +132,7 @@ class Utility(commands.Cog):
 
         await db.commit()
         try:
-            await interaction.followup.send(f"Counting channel set to {channel.mention}")
+            await interaction.followup.send(f"Counting channel set to {channel.mention}. Set by {interaction.user.mention}")
         except Exception as e:
             await interaction.followup.send(f"Error: {e}", ephemeral=True)
 
@@ -129,16 +183,19 @@ class Utility(commands.Cog):
 
     @commands.command(name="commands")
     async def show_commands(self, ctx: discord.ext.commands.Context):
-        embed = discord.Embed(
-            title="Commands", description=None, color=discord.Color.green()
-        )
+        user_icon = ctx.author,avatar.url if ctx.author.avatar else None
+        embed = discord.Embed(title="Commands", description=None, color=discord.Color.green())
+        embed.set_footer(text=f"Requested by {ctx.author}", icon_url=user_icon)
 
         for cog_name, cog in self.bot.cogs.items():
             commands_list = cog.get_commands()
             slash_commands = cog.get_app_commands()
+
             if commands_list or slash_commands:
                 commands_info = " ".join([f"`r:{cmd.name}`" for cmd in commands_list])
                 app_info = " ".join([f"`/{cmd.name}`" for cmd in slash_commands])
+
+
                 embed.add_field(
                     name=f"{cog_name}",
                     value=f"{commands_info} {app_info}",
@@ -155,9 +212,12 @@ async def main():
         "cogs.actions",
         "cogs.count",
         # NOTE: cogs.ai is VERY slow if you don't have a CUDA GPU ( and could slow down your CPU ). If you want, remove the next line
+        "cogs.ai",
         "cogs.logs",
         "cogs.tod",
         "cogs.exp",
+        "cogs.currency",
+        "cogs.progression",
         "cogs.stats",
         "cogs.admin"] 
 
