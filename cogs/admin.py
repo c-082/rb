@@ -1,20 +1,14 @@
 import discord
 from discord.ext import commands
-from discord import app_commands
-
 
 class Admin(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
     @commands.command(name="show_members")
-    @commands.has_any_role(
-        1416016772284416000, 1412776444379267082, 1412776298346184764
-    )
+    @commands.has_permissions(administrator=True)
     async def show_members(self, ctx):
-        embed = discord.Embed(
-            title="Server Members", description=None, color=discord.Color.green()
-        )
+        embed = discord.Embed(title="Server Members", description=None, color=discord.Color.green())
 
         members = [member for member in ctx.guild.members if not member.bot]
         members_list = [f"{member.mention} - {member.name}" for member in members]
@@ -43,12 +37,22 @@ class Admin(commands.Cog):
                 chunks.append("\n".join(current_chunk))
 
             for i, chunk in enumerate(chunks, 1):
-                embed.add_field(name="", value=chunk, inline=False)
+                embed.add_field(name=i, value=chunk, inline=False)
 
         else:
             embed.add_field(name="Server Members", value=members_text, inline=False)
 
         await ctx.send(embed=embed)
+
+    @commands.command(name="purge")
+    @commands.has_permissions(manage_messages=True)
+    async def purge(self, ctx, amount: int):
+        if amount <= 0:
+            await ctx.send(f"Enter a positive value to delete message, {ctx.author.mention}")
+            return
+
+        await ctx.channel.purge(limit=amount + 1)
+        await ctx.send(f"{amount} messages purged.", delete_after=3.0) 
 
     @commands.command(name="kick")
     @commands.has_permissions(kick_members=True)
@@ -69,16 +73,14 @@ class Admin(commands.Cog):
             await member.kick(reason=reason)
             await ctx.send(embed=embed)
         except discord.Forbidden:
-            await ctx.send(f"BE GONE YOU FE- oh i cant do that -_-")
+            await ctx.send("BE GONE YOU FE- oh i cant do that -_-")
         except Exception as e:
             await ctx.send(f"Error: {e} -_-")
 
     @commands.command(name="ban")
     @commands.has_permissions(ban_members=True)
     async def ban_member(self, ctx, member: discord.Member, reason=None):
-        embed = discord.Embed(
-            title=None, description=f"{ctx.author}: kicked {member} \n Reason: {reason}"
-        )
+        embed = discord.Embed(description=f"{ctx.author}: banned {member} \n Reason: {reason}")
 
         if member == ctx.author:
             await ctx.send(f"You can't do that to yourself, {member} -_-")
