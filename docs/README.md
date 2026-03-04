@@ -1,3 +1,6 @@
+<h1 align="center">
+    <img src="../images/ralsei.png" alt="Ralsei Bot">
+</h1>
 # Ralsei Bot
 Ralsei bot (or RB for short) is a fun Discord bot written in Python. It’s a small multi-use bot made for mostly experimentation. It has some basic features like a counting game, a simple EXP system, etc 
 
@@ -13,12 +16,74 @@ To install Ralsei bot, you must clone the repo and install it's dependencies
 ```bash
 git clone https://github.com/theoriginalralsei/ralsei-bot.git
 cd ralsei-bot
-pip install discord asyncio aiosqlite torch 
+pip install discord asyncio dotenv aiosqlite torch 
 ```
 
 Then do the following:
 1. Create a `.env` file
 2. Add a `TOKEN` key in that file containing your bot token
+
+# Setup
+After installation, configure the bot for your server:
+
+1. **Invite the bot** to your server with the required permissions (read messages, send messages, manage interactions)
+2. **Set up the counting channel** (optional):
+   - Add a row to the `server` table with your `guild_id` and `counting_channel` ID
+3. **Start the bot**:
+   ```bash
+   python main.py
+   ```
+
+# Features
+Ralsei Bot includes the following features:
+
+- **Counting Game**: A server-wide counting game with math expression support
+- **EXP System**: Earn experience by sending messages, with level-ups and leaderboards
+- **Currency System**: Gamble with coins using games like coinflip and dice
+- **AI Text Generation**: Generate text using GPT-2 ( I know it's only GPT-2 but c'mon- )
+- **Fun Commands**: 8ball, scream, speak, and more
+- **Actions**: Hug, kiss, headpat, and slap other users
+- **User Stats**: View your EXP and currency balance
+- **Admin Tools**: Moderation commands (purge, kick, ban)
+
+# Commands
+
+## General
+| Command | Description | Aliases |
+|---------|-------------|---------|
+| `r:stats` | View your EXP and currency | - |
+| `r:leaderboard` | View server EXP leaderboard | - |
+| `/8ball <question>` | Ask Ralsei a question | Slash command |
+| `r:scream` | Scream really loud | `s`, `scream` |
+| `r:speak <message>` | Make Ralsei speak | `sp`, `speak` |
+
+## Currency
+| Command | Description | Aliases |
+|---------|-------------|---------|
+| `r:coinflip <bet>` | Bet on heads or tails | `cf` |
+| `r:dice <bet> <guess>` | Guess a number 1-6 | `di` |
+| `r:daily` | Claim daily reward (10-90 currency) | - |
+
+## Actions (Slash Commands)
+| Command | Description |
+|---------|-------------|
+| `/action hug <member>` | Hug someone |
+| `/action kiss <member>` | Kiss someone |
+| `/action headpat <member>` | Headpat someone |
+| `/action slap <member>` | Slap someone |
+
+## AI
+| Command | Description |
+|---------|-------------|
+| `/ai <prompt>` | Generate text with AI (max 1000 chars) |
+
+## Admin (Moderator Only)
+| Command | Description |
+|---------|-------------|
+| `r:show_members` | List all server members |
+| `r:purge <amount>` | Delete messages |
+| `r:kick <member> [reason]` | Kick a member |
+| `r:ban <member> [reason]` | Ban a member |
 
 # Contributing
 Contributions Guidelines can be found [here](docs/CONTRIBUING.md)
