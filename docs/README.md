@@ -1,6 +1,7 @@
 <h1 align="center">
     <img src="../images/ralsei.png" alt="Ralsei Bot">
 </h1>
+
 # Ralsei Bot
 Ralsei bot (or RB for short) is a fun Discord bot written in Python. It’s a small multi-use bot made for mostly experimentation. It has some basic features like a counting game, a simple EXP system, etc 
 
