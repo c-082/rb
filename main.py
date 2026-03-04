@@ -33,7 +33,7 @@ class Utility(commands.Cog):
 
     async def get_best_count(self, guild_id):
         db = await get_database()
-        async with db.excute("SELECT best_count FROM count_state WHERE guild_id = ?", (guild_id,)) as cursor:
+        async with db.execute("SELECT best_count FROM count_state WHERE guild_id = ?", (guild_id,)) as cursor:
             row = await cursor.fetchone()
 
         return row[0] if row else None
@@ -183,7 +183,7 @@ class Utility(commands.Cog):
 
     @commands.command(name="commands")
     async def show_commands(self, ctx: discord.ext.commands.Context):
-        user_icon = ctx.author,avatar.url if ctx.author.avatar else None
+        user_icon = ctx.author.avatar.url if ctx.author.avatar else None
         embed = discord.Embed(title="Commands", description=None, color=discord.Color.green())
         embed.set_footer(text=f"Requested by {ctx.author}", icon_url=user_icon)
 
@@ -212,7 +212,6 @@ async def main():
         "cogs.actions",
         "cogs.count",
         # NOTE: cogs.ai is VERY slow if you don't have a CUDA GPU ( and could slow down your CPU ). If you want, remove the next line
-        "cogs.ai",
         "cogs.logs",
         "cogs.tod",
         "cogs.exp",
