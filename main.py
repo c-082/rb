@@ -7,6 +7,7 @@ from dotenv import load_dotenv
 from db.connection import get_database
 import time
 import aiosqlite
+import requests
 
 load_dotenv()
 TOKEN = os.getenv("TOKEN")
