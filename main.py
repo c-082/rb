@@ -10,6 +10,9 @@ import aiosqlite
 
 load_dotenv()
 TOKEN = os.getenv("TOKEN")
+github_token = os.getenv("GITHUB_TOKEN")
+REPO_OWNER = "theoriginalralsei"
+REPO_NAME = "ralsei-bot"
 intents = discord.Intents.all()
 bot = commands.Bot(command_prefix="r:", intents=intents)
 starter_time = time.perf_counter()
@@ -61,6 +64,30 @@ class Utility(commands.Cog):
 
         return row[0] if row else None
 
+    def get_commits(self, owner=REPO_OWNER, repo=REPO_NAME, count=10):
+        url = f"https://api.github.com/repos/{owner}/{repo}/commits"
+        headers = {
+                "Authorization": f"token {github_token}",
+                "Accept": "application/vnd.github.v3+json"
+            }
+
+        response = requests.get(url, headers=headers, params={"per_page": count})
+
+        if response.status_code == 200:
+             commits = response.json()
+             return [
+                     {
+                        "sha": c["sha"],
+                        "author": c["commit"]["author"]["name"],
+                        "message": c["commit"]["message"].split("\n")[0],
+                        "date": c["commit"]["author"]["date"],
+                        "url": c["html_url"],
+                        }
+                     for c in commits
+                     ]
+        return None
+
+
     @commands.command(name="ping")
     async def ping(self, ctx):
         latency = round(self.bot.latency * 1000)
@@ -90,6 +117,32 @@ class Utility(commands.Cog):
 
         await ctx.send(embed=embed)
 
+    @commands.hybrid_command(name="commits", aliases=["latest", "recent"])
+    async def commits(self, ctx):
+        commits = self.get_commits()
+        if not commits:
+            embed = discord.Embed(
+                title="Error",
+                description="Could not fetch commits",
+                color=discord.Color.red(),
+            )
+            await ctx.send(embed=embed)
+            return
+
+        embed = discord.Embed(
+            title=f"Latest {len(commits)} Commits",
+            description=f"Recent commits for [ralsei-bot](https://github.com/theoriginalralsei/ralsei-bot)",
+            color=discord.Color.green(),
+        )
+
+        for c in commits:
+            embed.add_field(
+                name=f"{c['sha'][:7]} - {c['author']}",
+                value=f"[{c['message']}]({c['url']})",
+                inline=False,
+            )
+
+        await ctx.send(embed=embed)
 
     @app_commands.command(name="welcome", description="Setup your Welcome channel")
     @app_commands.default_permissions(administrator=True)
@@ -213,7 +266,6 @@ async def main():
         "cogs.count",
         # NOTE: cogs.ai is VERY slow if you don't have a CUDA GPU ( and could slow down your CPU ). If you want, remove the next line
         "cogs.logs",
-        "cogs.tod",
         "cogs.exp",
         "cogs.currency",
         "cogs.progression",
