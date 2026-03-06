@@ -268,7 +268,6 @@ async def main():
         "cogs.logs",
         "cogs.exp",
         "cogs.currency",
-        "cogs.progression",
         "cogs.stats",
         "cogs.admin"] 
 
