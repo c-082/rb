@@ -65,28 +65,52 @@ class Count(commands.Cog):
             
         return row[0] if row and row[0] else None
 
-    async def get_current_count(self, guild_id: int):
-        await self.ensure_guild_entry(guild_id)
+    async def process_count(self, guild_id: int, user_id: int, number: int):
+        db = await get_database()
         
-        db = await get_database()
-        async with db.execute(
-            "SELECT current_count, last_user_id, best_count FROM count_state WHERE guild_id = ?", (guild_id,)
-        ) as cursor:
-            row = await cursor.fetchone()
-
-        return row if row else (0, None, 0)
-
-    async def update_count(self, guild_id: int, current: int, last_user: int | None, best: int):
-        db = await get_database()
         await db.execute(
             """
-            UPDATE count_state
-            SET current_count = ?, last_user_id = ?, best_count = ?
-            WHERE guild_id = ?
+            INSERT OR IGNORE INTO count_state 
+            (guild_id,current_count, best_count, last_user_id)
+            VALUES (?, 0, 0, NULL)
             """,
-            (current, last_user, best, guild_id),
+            (guild_id,),
+        )
+        
+        async with db.execute(
+            "SELECT current_count, last_user_id, best_count FROM count_state WHERE guild_id = ? FOR UPDATE",
+            (guild_id,)
+        ) as cursor:
+            row = await cursor.fetchone()
+        
+        if not row:
+            return None, None, None
+            
+        current, last_id, best = row[0], row[1], row[2]
+        
+        if user_id == last_id:
+            await db.execute(
+                "UPDATE count_state SET current_count = 0, last_user_id = NULL WHERE guild_id = ?",
+                (guild_id,),
             )
-        await db.commit()
+            await db.commit()
+            return "same_user", current, best
+        
+        if number == current + 1:
+            new_best = max(best, number)
+            await db.execute(
+                "UPDATE count_state SET current_count = ?, last_user_id = ?, best_count = ? WHERE guild_id = ?",
+                (number, user_id, new_best, guild_id),
+            )
+            await db.commit()
+            return "success", number, new_best
+        else:
+            await db.execute(
+                "UPDATE count_state SET current_count = 0, last_user_id = NULL WHERE guild_id = ?",
+                (guild_id,),
+            )
+            await db.commit()
+            return "broken", current + 1, best
 
     @commands.Cog.listener()
     async def on_message(self, message: discord.Message):
@@ -110,27 +134,20 @@ class Count(commands.Cog):
         except Exception as e:
             return
 
-        current, last_id, best = await self.get_current_count(message.guild.id)
+        result_type, current, best = await self.process_count(message.guild.id, message.author.id, number)
 
-        if message.author.id == last_id:
+        if result_type == "same_user":
             await message.add_reaction("❌")
             await message.channel.send(
                 f"{message.author.mention}, you can't count twice in a row! Reset to 0."
             )
-            await self.update_count(message.guild.id, 0, None, best)
-            return
-
-        if number == current + 1: 
-            new_best = max(best, number)
-            await self.update_count(message.guild.id, number, message.author.id, new_best)
+        elif result_type == "success":
             await message.add_reaction("✅")
-        else:
+        elif result_type == "broken":
             await message.add_reaction("❌")
             await message.channel.send(
-                    f"{message.author.mention} broke the count at **{current + 1}**. Reset to 1."
+                    f"{message.author.mention} broke the count at **{current}**. Reset to 1."
             )
-
-            await self.update_count(message.guild.id, 0, None, best)
 
 
 

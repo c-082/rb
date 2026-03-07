@@ -4,7 +4,7 @@ from discord.ext import commands
 import asyncio
 import os
 from dotenv import load_dotenv
-from db.connection import get_database
+from db.connection import get_database, init_database, close_database
 import time
 import aiosqlite
 import requests
@@ -25,11 +25,18 @@ async def on_ready():
     print(f"Logged in as {bot.user}!")
 
 async def setup_database():
-    async with aiosqlite.connect("database.db") as db:
-        with open("db/setup.sql", "r") as f:
-            await db.executescript(f.read())
-        await db.commit()
+    await init_database()
 
+@bot.event
+async def on_ready():
+    sync = await bot.tree.sync()
+    print(f"Synced {len(sync)} app commands!")
+    print(f"Logged in as {bot.user}!")
+
+@bot.event
+async def on_shutdown():
+    await close_database()
+    print("Database connection closed.")
 
 class Utility(commands.Cog):
     def __init__(self, bot):
