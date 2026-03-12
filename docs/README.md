@@ -12,6 +12,46 @@ if you wanna use Ralsei bot as a sort of template, you need the following:
 
 Make sure the your bot has permission to read messages, send, and manage interactions in the guild.
 
+# Project layout
+This is the entire project layout (if you don't count the pycache)
+```
+ralsei-bot/
+    |
+    |
+    main.py (The main file where the bot runs)
+    |
+    |
+    |db/
+    | |
+    | |
+    | __init__.py (Makes db/ a package so it cogs can connect to it)
+    | |
+    | |
+    | setup.sql (Where it creates the Database tables)
+    | |
+    | |
+    | connection.py (The place where the cogs connect to the DB)
+    |
+    |cogs/
+    | |
+    | |
+    | ... (Usually where all the cogs are stored like ai.py, count.py, etc)
+    |
+    |docs/
+    | |
+    | |
+    | |
+    | ... (Beuh do you need to see this -_-)
+    |
+    |
+    |images/
+      ... (Contains all media needed for docs or a dashboard. Currently only having ralsei.png)
+    |
+    |
+    /
+
+```
+
 # Installation
 To install Ralsei bot, you must clone the repo and install it's dependencies 
 ```bash
@@ -85,6 +125,15 @@ Ralsei Bot includes the following features:
 | `r:purge <amount>` | Delete messages |
 | `r:kick <member> [reason]` | Kick a member |
 | `r:ban <member> [reason]` | Ban a member |
+
+
+# To-do
+Currently trying to work on:
+    - [ ] An Inventory system for currency
+
+    - [ ] A dashboard/website
+
+    - [ ] Idk maybe you'll give me ideas
 
 # Contributing
 Contributions Guidelines can be found [here](docs/CONTRIBUING.md)
