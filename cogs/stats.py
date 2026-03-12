@@ -1,3 +1,4 @@
+from math import sqrt, floor
 import discord
 import aiosqlite
 from db.connection import get_database
@@ -23,6 +24,9 @@ class Stats(commands.Cog, name="User Stats"):
 
         return row[0] if row else 0
 
+    def get_level(self, exp):
+        return floor(sqrt(exp//50))
+
     @commands.command("stats")
     async def get_user_stats(self, ctx):
         user_icon = ctx.author.avatar.url if ctx.author.avatar else None
@@ -35,6 +39,7 @@ class Stats(commands.Cog, name="User Stats"):
 
         embed.add_field(name="User", value=f"{ctx.author.name}", inline=False)
         embed.add_field(name="Current EXP", value=f"{await self.get_user_exp_stats(ctx.author.id, ctx.guild.id)}", inline=False)
+        embed.add_field(name="Current Level", value=f"{self.get_level(await self.get_user_exp_stats(ctx.author.id, ctx.guild.id))}", inline=False)
         embed.add_field(name="Currency", value=f"{await self.get_user_cur_stats(ctx.author.id, ctx.guild.id)}", inline=False)
 
         await ctx.send(embed=embed)
