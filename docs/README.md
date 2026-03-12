@@ -129,6 +129,7 @@ Ralsei Bot includes the following features:
 
 # To-do
 Currently trying to work on:
+
     - [ ] An Inventory system for currency
 
     - [ ] A dashboard/website
