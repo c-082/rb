@@ -98,6 +98,10 @@ Ralsei Bot includes the following features:
 | `r:scream` | Scream really loud | `s`, `scream` |
 | `r:speak <message>` | Make Ralsei speak | `sp`, `speak` |
 
+
+> [!CAUTION]
+> 8Ball's responses are broken since the UTDR Text Box Generator's Hotlinks are disabled temporarily
+
 ## Currency
 | Command | Description | Aliases |
 |---------|-------------|---------|
