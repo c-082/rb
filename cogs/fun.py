@@ -2,6 +2,9 @@ import discord
 from discord.ext import commands
 import random
 from discord import app_commands
+import aiohttp
+
+API_BASE = "https://api.truthordarebot.xyz/v1"
 
 arr_truth = [
     "When was ya' first kiss?",
@@ -20,33 +23,64 @@ arr_dare = [
     "Recreate this bot, now."
 ]
 
+
+async def fetch_tod(session, endpoint, rating="pg"):
+    try:
+        async with session.get(f"{API_BASE}/{endpoint}?rating={rating}") as resp:
+            if resp.status == 200:
+                data = await resp.json()
+                return data.get("question")
+    except Exception as e:
+       print(e) 
+    return None
+
 class TODView(discord.ui.View):
     def __init__(self):
         super().__init__(timeout=None)
 
     @discord.ui.button(label="Truth", style=discord.ButtonStyle.green)
     async def truth_button(self, interaction: discord.Interaction, button: discord.ui.Button):
-        question = random.choice(arr_truth)
+        async with aiohttp.ClientSession() as session:
+            question = await fetch_tod(session, "truth", "pg")
+        question = question or random.choice(arr_truth)
         embed = discord.Embed(
             title="Truth", description=f"**{question}**", color=discord.Color.green()
         )
+
+        embed.set_footer(text=f"Requested by {interaction.user.name}", icon_url=interaction.user.display_avatar.url)
         await interaction.response.send_message(embed=embed, view=self)
 
     @discord.ui.button(label="Dare", style=discord.ButtonStyle.red)
     async def dare_button(self, interaction: discord.Interaction, button: discord.ui.Button):
-        dare = random.choice(arr_dare)
+        async with aiohttp.ClientSession() as session:
+            dare = await fetch_tod(session, "dare", "pg")
+        dare = dare or random.choice(arr_dare)
         embed = discord.Embed(
             title="Dare", description=f"**{dare}**", color=discord.Color.red()
         )
+        embed.set_footer(text=f"Requested by {interaction.user.name}", icon_url=interaction.user.display_avatar.url)
         await interaction.response.send_message(embed=embed, view=self)
 
     @discord.ui.button(label="Random", style=discord.ButtonStyle.secondary)
     async def random_button(self, interaction: discord.Interaction, button: discord.ui.Button):
-        random_tod = random.choice([random.choice(arr_truth), random.choice(arr_dare)])
+        async with aiohttp.ClientSession() as session:
+            if random.random() < 0.5:
+                random_tod = await fetch_tod(session, "truth", "pg")
+                if not random_tod:
+                    random_tod = random.choice(arr_truth)
+                color = discord.Color.green()
+                title = "Truth"
+            else:
+                random_tod = await fetch_tod(session, "dare", "pg")
+                if not random_tod:
+                    random_tod = random.choice(arr_dare)
+                color = discord.Color.red()
+                title = "Dare"
+        
         embed = discord.Embed(
-            title="Random", description=f"**{random_tod}**", color=0xFFFFFE
+            title=title, description=f"**{random_tod}**", color=color
         )
-
+        embed.set_footer(text=f"Requested by {interaction.user.name}", icon_url=interaction.user.display_avatar.url)
         await interaction.response.send_message(embed=embed, view=self)
 
 class Fun(commands.Cog):
