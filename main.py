@@ -18,12 +18,6 @@ intents = discord.Intents.all()
 bot = commands.Bot(command_prefix="r:", intents=intents)
 starter_time = time.perf_counter()
 
-@bot.event
-async def on_ready():
-    sync = await bot.tree.sync()
-    print(f"Synced {len(sync)} app commands!")
-    print(f"Logged in as {bot.user}!")
-
 async def setup_database():
     await init_database()
 
@@ -242,8 +236,8 @@ class Utility(commands.Cog):
                 except discord.Forbidden:
                     print(f"Missing permissions to welcome message in {channel}")
 
-    @commands.command(name="commands")
-    async def show_commands(self, ctx: discord.ext.commands.Context):
+    @commands.hybrid_command(name="commands", description="Displays the Commands for RB")
+    async def show_commands(self, ctx: commands.Context):
         user_icon = ctx.author.avatar.url if ctx.author.avatar else None
         embed = discord.Embed(title="Commands", description=None, color=discord.Color.green())
         embed.set_footer(text=f"Requested by {ctx.author}", icon_url=user_icon)
@@ -272,7 +266,9 @@ async def main():
         "cogs.fun",
         "cogs.actions",
         "cogs.count",
-        # NOTE: cogs.ai is VERY slow if you don't have a CUDA GPU ( and could slow down your CPU ). If you want, remove the next line
+        # NOTE: cogs.ai is VERY slow if you don't have a CUDA GPU ( and could slow down your CPU ). If you want, unncoment the next line
+        # "cogs.ai",
+        "cogs.inventory",
         "cogs.logs",
         "cogs.exp",
         "cogs.currency",
