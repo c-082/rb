@@ -3,6 +3,7 @@ from discord.ext import commands
 import random
 from discord import app_commands
 import aiohttp
+import sys
 
 API_BASE = "https://api.truthordarebot.xyz/v1"
 
@@ -87,6 +88,11 @@ class Fun(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
+    def load_ship_bar(self, percent: int, width=20):
+        length = int(width * percent // 100)
+        bar = '█' * length + '░' * (width - length)
+        return f"{bar} {percent}%"
+
     @commands.command(name="Scream", aliases=["scream", "s"])
     async def Scream(self, ctx):
         embed = discord.Embed(
@@ -150,6 +156,25 @@ class Fun(commands.Cog):
                 )
         await interaction.response.send_message(embed=embed, view=view)
 
+    @commands.hybrid_command(name="ship", description="Ship Someoone with Someone else :3")
+    async def ship(self, ctx: commands.Context, user_1: discord.Member, user_2: discord.Member):
+        ship_number = random.randint(1, 100)
+        ship_meter = self.load_ship_bar(ship_number) 
+        name1 = user_1.name[1:] if len(user_1.name) > 1 else user_1.name
+        name2 = user_2.name[:1] if len(user_2.name) > 0 else user_2.name
+        ship_name = name1 + name2
+
+        embed = discord.Embed(
+                title="Ship",
+                description=f"Shipping {user_1.mention} X {user_2.mention}",
+                color=discord.Color.green()
+        )
+        embed.add_field(name="Ship name", value=ship_name, inline=False)
+        embed.add_field(name="Ship Meter", value=ship_meter, inline=False)
+
+        embed.set_footer(text=f"Used by {ctx.author.name}", icon_url=ctx.author.avatar)
+
+        await ctx.send(embed=embed)
 
 async def setup(bot):
     await bot.add_cog(Fun(bot))

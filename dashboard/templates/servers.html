@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+
+{% block title %}Ralsei Bot - Servers{% endblock %}
+
+{% block content %}
+    <div class="server-list">
+        <h1>Manage Servers</h1>
+        {% if servers %}
+        <table>
+            <caption>Server configuration settings</caption>
+            <thead>
+                <tr>
+                    <th scope="col">Guild ID</th>
+                    <th scope="col">Welcome Channel</th>
+                    <th scope="col">Counting Channel</th>
+                    <th scope="col">Log Channel</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for server in servers %}
+                <tr>
+                    <td>{{ server.guild_id }}</td>
+                    <td>{{ server.welcome_channel or 'Not set' }}</td>
+                    <td>{{ server.counting_channel or 'Not set' }}</td>
+                    <td>{{ server.log_channel or 'Not set' }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <p>No servers found.</p>
+        {% endif %}
+    </div>
+{% endblock %}
