@@ -1,8 +1,10 @@
+import os
 import aiosqlite
 import asyncio
 from contextlib import asynccontextmanager
 
 DB_PATH = "database.db"
+setup_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "setup.sql")
 
 _db = None
 _lock = asyncio.Lock()
@@ -35,7 +37,7 @@ async def get_db():
 
 async def init_database():
     async with aiosqlite.connect(DB_PATH) as db:
-        with open("db/setup.sql", "r") as f:
+        with open(setup_path, "r") as f:
             await db.executescript(f.read())
         await db.commit()
         await db.execute("CREATE INDEX IF NOT EXISTS idx_user_guild_id ON user(guild_id);")
