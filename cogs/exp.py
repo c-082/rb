@@ -5,6 +5,7 @@ import discord
 from discord.ext import commands, tasks
 from discord import app_commands, guild, user
 import aiosqlite
+import random
 
 save_interval_seconds = 60
 flush_interval = 60
@@ -140,9 +141,16 @@ class EXP(commands.Cog):
 
         total_exp_after = total_exp_before + gained_exp
         new_level = self.get_level(total_exp_after)
+        
+        currency_system = self.bot.get_cog("Currency")
+        random_gain = random.randint(10, 60)
+        if currency_system:
+            await currency_system.update_user_cur(message.author.id, random_gain, message.guild.id)
+        else:
+            await message.channel.send("Failed to load Currency System -_-")
 
         if new_level > old_level:
-            await message.channel.send(f"{message.author.mention} has leveled up! {old_level} -> {new_level}")
+            await message.channel.send(f"{message.author.mention} has leveled up and gained {random_gain} Currency! {old_level} -> {new_level}")
 
     @commands.command(name="leaderboard")
     async def leaderboard(self, ctx: commands.Context):
