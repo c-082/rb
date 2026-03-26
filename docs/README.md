@@ -99,7 +99,7 @@ Ralsei Bot includes the following features:
 | `r:leaderboard` | View server EXP leaderboard | - |
 | `/fun 8ball <question>` | Ask Ralsei a question | Slash command |
 | `r:scream` | Scream really loud | `s`, `scream` |
-| `r:speak <message>` | Make Ralsei speak | `sp`, `speak` |
+| `r:speak <message>` | Make Ralsei speak (in other words, just copy what you say )| `sp`, `speak` |
 
 
 ## Currency
@@ -108,6 +108,16 @@ Ralsei Bot includes the following features:
 | `r:coinflip <bet>` | Bet on heads or tails | `cf` |
 | `r:dice <bet> <guess>` | Guess a number 1-6 | `di` |
 | `r:daily` | Claim daily reward (10-90 currency) | - |
+
+## Shop/Inventory
+| Command | Description | Aliases |
+|---------|-------------|---------|
+|`r:inventory` | See your Inventory | `inv` |
+|`r:shop`| View the Server's Shop | - |
+|`r:buy <item-name>` | Buy an Item | - |
+|`r:sell <item-name>` |Sell an Item | - |
+|`r:add-item <item-name> <price>` | Add an Item to the Shop | - |
+|`r:remove-item <item-name> <price>` | Remove an Item to the Shop | - |
 
 ## Actions (Slash Commands)
 | Command | Description |
@@ -126,7 +136,7 @@ Ralsei Bot includes the following features:
 > [!CAUTION]
 > The AI doesn't actually work because I am not rich enough to host GPT-2 (hey look at least im honest)
 
-## Admin (Moderator Only)
+## Admin Commands 
 | Command | Description |
 |---------|-------------|
 | `r:show_members` | List all server members |
