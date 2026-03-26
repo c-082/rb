@@ -45,7 +45,10 @@ ralsei-bot/
     |
     |
     |images/
-      ... (Contains all media needed for docs or a dashboard. Currently only having ralsei.png)
+    | |
+    | |
+    | |
+    | ... (Contains all media needed for docs or a dashboard. Currently only having ralsei.png)
     |
     |
     /
@@ -94,13 +97,10 @@ Ralsei Bot includes the following features:
 |---------|-------------|---------|
 | `r:stats` | View your EXP and currency | - |
 | `r:leaderboard` | View server EXP leaderboard | - |
-| `/8ball <question>` | Ask Ralsei a question | Slash command |
+| `/fun 8ball <question>` | Ask Ralsei a question | Slash command |
 | `r:scream` | Scream really loud | `s`, `scream` |
 | `r:speak <message>` | Make Ralsei speak | `sp`, `speak` |
 
-
-> [!CAUTION]
-> 8Ball's responses are broken since the UTDR Text Box Generator's Hotlinks are disabled temporarily
 
 ## Currency
 | Command | Description | Aliases |
@@ -122,6 +122,10 @@ Ralsei Bot includes the following features:
 |---------|-------------|
 | `/ai <prompt>` | Generate text with AI (max 1000 chars) |
 
+
+> [!CAUTION]
+> The AI doesn't actually work because I am not rich enough to host GPT-2 (hey look at least im honest)
+
 ## Admin (Moderator Only)
 | Command | Description |
 |---------|-------------|
@@ -134,11 +138,11 @@ Ralsei Bot includes the following features:
 # To-do
 Currently trying to work on:
 
-    - [ ] An Inventory system for currency
+- [x] An Inventory system for currency
 
-    - [ ] A dashboard/website
+- [ ] A dashboard/website
 
-    - [ ] Idk maybe you'll give me ideas
+- [ ] Idk maybe you'll give me ideas
 
 # Contributing
 Contributions Guidelines can be found [here](docs/CONTRIBUING.md)
