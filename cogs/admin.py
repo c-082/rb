@@ -1,12 +1,17 @@
 import discord
 from discord.ext import commands
 
-class Admin(commands.Cog):
+class Admin(commands.Cog, name="Admin Only Commands"):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.command(name="show_members")
+    @commands.group(name="admin", invoke_without_command=True)
     @commands.has_permissions(administrator=True)
+    async def admin_group(self, ctx):
+        if ctx.invoked_subcommand is None:
+            await ctx.send_help(ctx.command)
+
+    @admin_group.command(name="show_members")
     async def show_members(self, ctx):
         embed = discord.Embed(title="Server Members", description=None, color=discord.Color.green())
 
@@ -44,7 +49,7 @@ class Admin(commands.Cog):
 
         await ctx.send(embed=embed)
 
-    @commands.command(name="purge")
+    @admin_group.command(name="purge")
     @commands.has_permissions(manage_messages=True)
     async def purge(self, ctx, amount: int):
         if amount <= 0:
@@ -54,7 +59,7 @@ class Admin(commands.Cog):
         await ctx.channel.purge(limit=amount + 1)
         await ctx.send(f"{amount} messages purged.", delete_after=3.0) 
 
-    @commands.command(name="kick")
+    @admin_group.command(name="kick")
     @commands.has_permissions(kick_members=True)
     async def kick_member(self, ctx, member: discord.Member, reason=None):
         embed = discord.Embed(
@@ -77,7 +82,7 @@ class Admin(commands.Cog):
         except Exception as e:
             await ctx.send(f"Error: {e} -_-")
 
-    @commands.command(name="ban")
+    @admin_group.command(name="ban")
     @commands.has_permissions(ban_members=True)
     async def ban_member(self, ctx, member: discord.Member, reason=None):
         embed = discord.Embed(description=f"{ctx.author}: banned {member} \n Reason: {reason}")

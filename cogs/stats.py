@@ -28,7 +28,10 @@ class Stats(commands.Cog, name="User Stats"):
         return floor(sqrt(exp//50))
 
     @commands.command("stats")
-    async def get_user_stats(self, ctx):
+    async def get_user_stats(self, ctx, member: discord.Member = None):
+        if not member:
+            member = ctx.author
+
         user_icon = ctx.author.avatar.url if ctx.author.avatar else None
         embed = discord.Embed(
             title="Stats",
@@ -37,10 +40,10 @@ class Stats(commands.Cog, name="User Stats"):
 
         embed.set_footer(text=f"Used by {ctx.author}", icon_url=user_icon)
 
-        embed.add_field(name="User", value=f"{ctx.author.name}", inline=False)
-        embed.add_field(name="Current EXP", value=f"{await self.get_user_exp_stats(ctx.author.id, ctx.guild.id)}", inline=False)
-        embed.add_field(name="Current Level", value=f"{self.get_level(await self.get_user_exp_stats(ctx.author.id, ctx.guild.id))}", inline=False)
-        embed.add_field(name="Currency", value=f"{await self.get_user_cur_stats(ctx.author.id, ctx.guild.id)}", inline=False)
+        embed.add_field(name="User", value=f"{member.name}", inline=False)
+        embed.add_field(name="Current EXP", value=f"{await self.get_user_exp_stats(member.id, ctx.guild.id)}", inline=False)
+        embed.add_field(name="Current Level", value=f"{self.get_level(await self.get_user_exp_stats(member.id, ctx.guild.id))}", inline=False)
+        embed.add_field(name="Currency", value=f"{await self.get_user_cur_stats(member.id, ctx.guild.id)}", inline=False)
 
         await ctx.send(embed=embed)
 

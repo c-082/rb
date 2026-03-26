@@ -18,6 +18,8 @@ intents = discord.Intents.all()
 bot = commands.Bot(command_prefix="r:", intents=intents)
 starter_time = time.perf_counter()
 
+setup_group = app_commands.Group(name="setup", description="Server setup commands")
+
 async def setup_database():
     await init_database()
 
@@ -146,9 +148,9 @@ class Utility(commands.Cog):
 
         await ctx.send(embed=embed)
 
-    @app_commands.command(name="welcome", description="Setup your Welcome channel")
+    @setup_group.command(name="welcome", description="Setup your Welcome channel")
     @app_commands.default_permissions(administrator=True)
-    async def set_welcome(self, interaction: discord.Interaction, channel: discord.TextChannel):
+    async def setup_welcome(self, interaction: discord.Interaction, channel: discord.TextChannel):
         await interaction.response.defer()
 
         db = await get_database()
@@ -169,9 +171,9 @@ class Utility(commands.Cog):
         except Exception as e:
             await interaction.followup.send(f"Error: {e}", ephemeral=True)
 
-    @app_commands.command(name="counting", description="Set up your counting channel")
+    @setup_group.command(name="counting", description="Set up your counting channel")
     @app_commands.default_permissions(administrator=True)
-    async def set_counting(self, interaction: discord.Interaction, channel: discord.TextChannel):
+    async def setup_counting(self, interaction: discord.Interaction, channel: discord.TextChannel):
         await interaction.response.defer()
 
         db = await get_database()
@@ -191,9 +193,9 @@ class Utility(commands.Cog):
         except Exception as e:
             await interaction.followup.send(f"Error: {e}", ephemeral=True)
 
-    @app_commands.command(name="modlog", description="Set up your modlog channel")
+    @setup_group.command(name="modlog", description="Set up your modlog channel")
     @app_commands.default_permissions(administrator=True)
-    async def set_modlog(
+    async def setup_modlog(
         self, interaction: discord.Interaction, channel: discord.TextChannel
     ):
         await interaction.response.defer()
@@ -239,7 +241,11 @@ class Utility(commands.Cog):
     @commands.hybrid_command(name="commands", description="Displays the Commands for RB")
     async def show_commands(self, ctx: commands.Context):
         user_icon = ctx.author.avatar.url if ctx.author.avatar else None
-        embed = discord.Embed(title="Commands", description=None, color=discord.Color.green())
+        embed = discord.Embed(
+            title="Commands",
+            description="All available commands for Ralsei Bot.",
+            color=discord.Color.green()
+        )
         embed.set_footer(text=f"Requested by {ctx.author}", icon_url=user_icon)
 
         for cog_name, cog in self.bot.cogs.items():
@@ -262,6 +268,7 @@ class Utility(commands.Cog):
 
 async def main():
     await setup_database()
+    bot.tree.add_command(setup_group)
     extensions = [
         "cogs.fun",
         "cogs.actions",
@@ -282,6 +289,8 @@ async def main():
         except Exception as e:
             print(f"Failed to load {ex}, reason {e}")
     await bot.add_cog(Utility(bot))
+    from cogs.fun import fun_group
+    bot.tree.add_command(fun_group)
     await bot.start(TOKEN)
 
 
