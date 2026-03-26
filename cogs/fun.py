@@ -91,7 +91,7 @@ class Fun(commands.Cog):
     def load_ship_bar(self, percent: int, width=20):
         length = int(width * percent // 100)
         bar = '█' * length + '░' * (width - length)
-        return f"{bar} {percent}%"
+        return f"{bar}"
 
     @commands.command(name="Scream", aliases=["scream", "s"])
     async def Scream(self, ctx):
@@ -160,18 +160,26 @@ class Fun(commands.Cog):
     async def ship(self, ctx: commands.Context, user_1: discord.Member, user_2: discord.Member):
         ship_number = random.randint(1, 100)
         ship_meter = self.load_ship_bar(ship_number) 
-        name1 = user_1.name[1:] if len(user_1.name) > 1 else user_1.name
-        name2 = user_2.name[:1] if len(user_2.name) > 0 else user_2.name
-        ship_name = name1 + name2
+
+        ship_message = f"{ship_number}% - " 
+
+        if ship_number in range(1, 25):
+            ship_message = f"{ship_number}% - Mehhh I can't see it."
+        elif ship_number in range(26, 50):
+            ship_message = f"{ship_number}% - Ok I could see it"
+        elif ship_number in range(51, 60):
+            ship_message = f"{ship_number}% - They should date"
+        elif ship_number in range(61, 100):
+            ship_message = f"{ship_number}% - Match made in Heavem."
 
         embed = discord.Embed(
                 title="Ship",
                 description=f"Shipping {user_1.mention} X {user_2.mention}",
                 color=discord.Color.green()
         )
-        embed.add_field(name="Ship name", value=ship_name, inline=False)
-        embed.add_field(name="Ship Meter", value=ship_meter, inline=False)
 
+        embed.add_field(name="Compatibility", value=ship_message, inline=False)
+        embed.add_field(name="Ship Meter", value=ship_meter, inline=False)
         embed.set_footer(text=f"Used by {ctx.author.name}", icon_url=ctx.author.avatar)
 
         await ctx.send(embed=embed)
