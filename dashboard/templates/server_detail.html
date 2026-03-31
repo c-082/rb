@@ -1,0 +1,78 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ server.name }} - Ralsei Bot{% endblock %}
+
+{% block content %}
+<div class="server-detail">
+    <div class="server-header">
+        {% if server.icon %}
+        <img src="{{ server.icon }}" alt="{{ server.name }}" class="server-icon">
+        {% else %}
+        <div class="server-icon-placeholder">{{ server.name[:2] }}</div>
+        {% endif %}
+        <h1>{{ server.name }}</h1>
+    </div>
+
+    <div class="stats-grid">
+        <div class="stat-card">
+            <h3>Current Count</h3>
+            <p class="stat-value">{{ server.current_count }}</p>
+        </div>
+        <div class="stat-card">
+            <h3>Best Count</h3>
+            <p class="stat-value">{{ server.best_count }}</p>
+        </div>
+    </div>
+
+    <div class="settings-section">
+        <h2>Channel Settings</h2>
+        <form id="settings-form">
+            <div class="form-group">
+                <label for="welcome_channel">Welcome Channel</label>
+                <input type="number" id="welcome_channel" name="welcome_channel" value="{{ server.welcome_channel or '' }}" placeholder="Channel ID">
+                <span class="channel-name">{% if server.welcome_channel_name %}Current: #{{ server.welcome_channel_name }}{% endif %}</span>
+            </div>
+            <div class="form-group">
+                <label for="counting_channel">Counting Channel</label>
+                <input type="number" id="counting_channel" name="counting_channel" value="{{ server.counting_channel or '' }}" placeholder="Channel ID">
+                <span class="channel-name">{% if server.counting_channel_name %}Current: #{{ server.counting_channel_name }}{% endif %}</span>
+            </div>
+            <div class="form-group">
+                <label for="log_channel">Log Channel</label>
+                <input type="number" id="log_channel" name="log_channel" value="{{ server.log_channel or '' }}" placeholder="Channel ID">
+                <span class="channel-name">{% if server.log_channel_name %}Current: #{{ server.log_channel_name }}{% endif %}</span>
+            </div>
+            <button type="submit" class="btn btn-primary">Save Settings</button>
+        </form>
+        <div id="settings-message"></div>
+    </div>
+
+    <div class="leaderboard-section">
+        <h2>Top Users</h2>
+        {% if leaderboard %}
+        <div class="leaderboard-list">
+            {% for member in leaderboard %}
+            <div class="leaderboard-item">
+                <span class="rank">#{{ loop.index }}</span>
+                {% if member.avatar %}
+                <img src="{{ member.avatar }}" alt="{{ member.username }}" class="user-avatar">
+                {% else %}
+                <div class="user-avatar-placeholder">{{ member.username[:2] }}</div>
+                {% endif %}
+                <div class="user-info">
+                    <span class="username">{{ member.global_name or member.username }}</span>
+                    {% if member.global_name %}
+                    <span class="display-name">@{{ member.username }}</span>
+                    {% endif %}
+                </div>
+                <span class="exp">{{ member.exp }} XP</span>
+                <span class="currency">{{ member.currency }} coins</span>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <p>No users found.</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

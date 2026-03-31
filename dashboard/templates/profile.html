@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+
+{% block title %}Profile - Ralsei Bot{% endblock %}
+
+{% block content %}
+    <div class="profile-page">
+        <h1>User Profile</h1>
+        
+        <div class="profile-header">
+            {% if profile.avatar %}
+            <img src="{{ profile.avatar }}" alt="{{ profile.username }}" class="profile-avatar">
+            {% else %}
+            <div class="profile-avatar-placeholder">{{ profile.username[:2] }}</div>
+            {% endif %}
+            <div class="profile-info">
+                <h2>{{ profile.global_name or profile.username }}</h2>
+                <p class="username">@{{ profile.username }}</p>
+                <p class="user-id">ID: {{ profile.user_id }}</p>
+            </div>
+        </div>
+        
+        {% if profile.stats %}
+        <div class="stats-section">
+            <h3>Stats</h3>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <h4>Experience</h4>
+                    <p class="stat-value">{{ profile.stats.exp }}</p>
+                </div>
+                <div class="stat-card">
+                    <h4>Currency</h4>
+                    <p class="stat-value">{{ profile.stats.currency }}</p>
+                </div>
+            </div>
+        </div>
+        {% else %}
+        <p>No stats found for this user.</p>
+        {% endif %}
+        
+        {% if user %}
+            <a href="/logout" class="btn btn-secondary">Logout</a>
+        {% else %}
+            <a href="/login" class="btn btn-primary">Login with Discord</a>
+        {% endif %}
+    </div>
+{% endblock %}

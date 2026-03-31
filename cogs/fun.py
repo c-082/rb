@@ -7,8 +7,6 @@ import sys
 
 API_BASE = "https://api.truthordarebot.xyz/v1"
 
-fun_group = app_commands.Group(name="fun", description="Fun commands")
-
 arr_truth = [
     "When was ya' first kiss?",
     "What's the most Femboy thing you've ever done?",
@@ -115,7 +113,7 @@ class Fun(commands.Cog):
 
         await ctx.send(embed=embed)
 
-    @fun_group.command(name="8ball", description="Talk with Ralsei of True Wisdom and Knowledge")
+    @app_commands.command(name="8ball", description="Talk with Ralsei of True Wisdom and Knowledge")
     async def ball(self, interaction: discord.Interaction, message: str):
         user_icon = interaction.user.avatar.url if interaction.user.avatar else None
         embed = discord.Embed(
@@ -148,7 +146,7 @@ class Fun(commands.Cog):
 
         await interaction.response.send_message(embed=embed)
 
-    @fun_group.command(name="tod", description="Play some TOD with Ralsei bot!")
+    @app_commands.command(name="tod", description="Play some TOD with Ralsei bot!")
     async def tod(self, interaction: discord.Interaction):
         view = TODView()
         embed = discord.Embed(

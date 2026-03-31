@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+
+{% block title %}Leaderboard - Ralsei Bot{% endblock %}
+
+{% block content %}
+<div class="leaderboard-page">
+    <h1>Global Leaderboard</h1>
+    <p>Top 20 users across all servers</p>
+    
+    {% if leaderboard %}
+    <div class="leaderboard-table">
+        <div class="leaderboard-header">
+            <span class="rank">Rank</span>
+            <span class="user">User</span>
+            <span class="exp">Total XP</span>
+            <span class="currency">Total Coins</span>
+        </div>
+        {% for member in leaderboard %}
+        <div class="leaderboard-row {% if loop.index <= 3 %}top-three{% endif %}">
+            <span class="rank">
+                {% if loop.index == 1 %}🥇
+                {% elif loop.index == 2 %}🥈
+                {% elif loop.index == 3 %}🥉
+                {% else %}{{ loop.index }}{% endif %}
+            </span>
+            <span class="user">
+                {% if member.avatar %}
+                <img src="{{ member.avatar }}" alt="{{ member.username }}" class="user-avatar-small">
+                {% else %}
+                <div class="user-avatar-placeholder-small">{{ member.username[:2] }}</div>
+                {% endif %}
+                <div class="user-info">
+                    <span>{{ member.global_name or member.username }}</span>
+                    {% if member.global_name %}
+                    <span class="display-name">@{{ member.username }}</span>
+                    {% endif %}
+                </div>
+            </span>
+            <span class="exp">{{ member.exp }}</span>
+            <span class="currency">{{ member.currency }}</span>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <p>No users found.</p>
+    {% endif %}
+</div>
+{% endblock %}
