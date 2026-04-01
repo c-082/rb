@@ -42,7 +42,7 @@ class Currency(commands.Cog):
 
             await db.execute("""
             UPDATE user
-            SET D$ = D$ + ?
+            SET currency = currency  + ?
             WHERE user_id = ? AND guild_id = ?
             """, (amount, user_id, guild_id,))
 
