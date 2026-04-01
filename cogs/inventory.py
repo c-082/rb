@@ -86,7 +86,7 @@ class Inventory(commands.Cog, name="Shop/Inventory"):
 
         embed = discord.Embed(title=f"{member.display_name}'s Inventory", color=discord.Color.blurple())
         for item_id, item_name, quantity in inventory:
-            embed.add_field(name=item_name, value=f"Qty: {quantity}", inline=True)
+            embed.add_field(name=item_name, value=f"Quantity: {quantity}", inline=True)
 
         await ctx.send(embed=embed)
 
@@ -101,7 +101,7 @@ class Inventory(commands.Cog, name="Shop/Inventory"):
             max_id = row[0] if row[0] is not None else -1
             item_id = str(max_id + 1)
         await self.add_shop_item(guild_id, item_id, item_name, price)
-        await ctx.send(f"Added {item_name} to shop for {price} currency!")
+        await ctx.send(f"Added {item_name} to shop for {price} D$!")
 
     @commands.command(name="remove-item")
     @commands.has_permissions(administrator=True)
@@ -146,7 +146,7 @@ class Inventory(commands.Cog, name="Shop/Inventory"):
         
         item_lines = []
         for item_id, item_name, price in items:
-            item_lines.append(f"`{item_id} {item_name}` - **{price}** currency")
+            item_lines.append(f"`{item_id}{item_name}` - **{price}** D$")
         
         embed.add_field(
             name="Available Items",
@@ -225,7 +225,7 @@ class Inventory(commands.Cog, name="Shop/Inventory"):
                     currency_cog = self.bot.get_cog("Currency")
                     if currency_cog:
                         await currency_cog.update_user_cur(user_id, total_price, guild_id)
-                    await ctx.send(f"Sold {quantity} {inv_name} for {total_price} coins!")
+                    await ctx.send(f"Sold {quantity} {inv_name} for {total_price} currency!")
                 return
 
         await ctx.send(f"You don't have {item_name} in your inventory!")
